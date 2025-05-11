@@ -8,3 +8,4 @@ const multiplier = (factor: number) => {
 const twice: (n: number) => number = multiplier(3)
 console.log(twice(5))
 console.log(twice(6))
+console.log(twice(6))
