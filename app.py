@@ -1,0 +1,6 @@
+def multiplier(factor):
+    def multiply(number):
+        return number * factor
+    return multiply
+twice = multiplier(2)
+print(twice(5))
