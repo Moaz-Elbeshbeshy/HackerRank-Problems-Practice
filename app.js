@@ -1,11 +1,22 @@
-const multiplier = (factor) => {
-    // return number => number * factor
-    return function (number) {
-        return number * factor
-    }
+const express = require('express')
+const app = express()
+require('dotenv').config()
+const bookRouter = require('./routes/books')
+
+const port = process.env.PORT || 3000
+
+app.use(express.json())
+
+// Router
+app.use('/books', bookRouter)
+
+
+
+
+const start = (port) => {
+    app.listen(port,
+        console.log(`Server listenning on port ${port}...`)
+    )
 }
 
-const twice = multiplier(2)
-console.log(twice(5))
-console.log(twice(5))
-console.log(twice(5))
+start(port)
