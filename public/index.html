@@ -2,13 +2,13 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Reminders App</title>
-    <!-- Tailwind CSS CDN with dark mode enabled -->
+
+    <!-- Tailwind CSS CDN with dark mode always enabled via class -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
-        // Enable dark mode with prefers-color-scheme
         tailwind.config = {
             darkMode: 'class',
             theme: {
@@ -24,21 +24,22 @@
             },
         };
     </script>
+
     <!-- Axios CDN -->
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
     <!-- React CDNs -->
     <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.development.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7/babel.min.js"></script>
 </head>
 
-<body class="min-h-screen bg-white dark:bg-dark-bg" id="body">
+<body class="min-h-screen bg-dark-bg text-dark-text dark" id="body">
     <div id="root" class="min-h-screen"></div>
 
     <script type="text/babel">
         const { useState, useEffect, Component } = React;
 
-        // Error Boundary Component
         class ErrorBoundary extends Component {
             state = { hasError: false, error: null };
 
@@ -59,7 +60,6 @@
             }
         }
 
-        // Main App Component
         const App = () => {
             const [reminders, setReminders] = useState([]);
             const [userInput, setUserInput] = useState('');
@@ -69,27 +69,16 @@
             const [filterAfter, setFilterAfter] = useState('');
             const [sortBy, setSortBy] = useState('');
             const [error, setError] = useState(null);
-            const [isDarkMode, setIsDarkMode] = useState(
-                window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches
-            );
             const [editingReminder, setEditingReminder] = useState(null);
 
-            // Toggle dark mode
-            const toggleDarkMode = () => {
-                setIsDarkMode(!isDarkMode);
-                document.getElementById('body').classList.toggle('dark', !isDarkMode);
-            };
+            const API_BASE = 'https://reminders-api-7lzq.onrender.com';
 
-            // Fetch reminders from backend
             const fetchReminders = async () => {
                 try {
-                    let url = 'https://reminders-api-7lzq.onrender.com/reminders';
+                    let url = `${API_BASE}/reminders`;
                     const params = new URLSearchParams();
                     if (filterUser) params.append('user', filterUser);
-                    if (filterAfter) {
-                        const epochTime = new Date(filterAfter).getTime();
-                        params.append('after', epochTime);
-                    }
+                    if (filterAfter) params.append('after', new Date(filterAfter).getTime());
                     if (sortBy) params.append('sortBy', sortBy);
                     if (params.toString()) url += `?${params.toString()}`;
 
@@ -101,12 +90,10 @@
                 }
             };
 
-            // Fetch reminders on mount and when filters/sort change
             useEffect(() => {
                 fetchReminders();
             }, [filterUser, filterAfter, sortBy]);
 
-            // Handle form submission to create or update a reminder
             const handleSubmit = async (e) => {
                 e.preventDefault();
                 if (!userInput || !descriptionInput || !dateInput) {
@@ -121,10 +108,10 @@
                         date: new Date(dateInput).toISOString(),
                     };
                     if (editingReminder) {
-                        await axios.patch(`http://localhost:3000/reminders/${editingReminder._id}`, reminder);
+                        await axios.patch(`${API_BASE}/reminders/${editingReminder._id}`, reminder);
                         setEditingReminder(null);
                     } else {
-                        await axios.post('http://localhost:3000/reminders', reminder);
+                        await axios.post(`${API_BASE}/reminders`, reminder);
                     }
                     setUserInput('');
                     setDescriptionInput('');
@@ -132,25 +119,21 @@
                     fetchReminders();
                     setError(null);
                 } catch (err) {
-                    setError(editingReminder ? 'Failed to update reminder: ' + err.message : 'Failed to create reminder: ' + err.message);
+                    setError('Error: ' + err.message);
                 }
             };
 
-            // Handle edit button click
             const handleEdit = (reminder) => {
                 setEditingReminder(reminder);
                 setUserInput(reminder.user || '');
                 setDescriptionInput(reminder.description || '');
-                const date = new Date(reminder.date);
-                const dateString = date.toISOString().slice(0, 16); // e.g., 2025-05-17T16:00
-                setDateInput(dateString);
+                setDateInput(new Date(reminder.date).toISOString().slice(0, 16));
             };
 
-            // Handle delete
             const handleDelete = async (id) => {
                 if (window.confirm('Are you sure you want to delete this reminder?')) {
                     try {
-                        await axios.delete(`http://localhost:3000/reminders/${id}`);
+                        await axios.delete(`${API_BASE}/reminders/${id}`);
                         fetchReminders();
                         setError(null);
                     } catch (err) {
@@ -159,7 +142,6 @@
                 }
             };
 
-            // Clear filters
             const clearFilters = () => {
                 setFilterUser('');
                 setFilterAfter('');
@@ -169,191 +151,97 @@
             return (
                 <ErrorBoundary>
                     <div className="container mx-auto p-6">
-                        {/* Dark Mode Toggle */}
-                        <div className="flex justify-end mb-4">
-                            <button
-                                onClick={toggleDarkMode}
-                                className="bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-dark-text px-4 py-2 rounded hover:bg-gray-400 dark:hover:bg-gray-600"
-                            >
-                                {isDarkMode ? 'Light Mode' : 'Dark Mode'}
-                            </button>
-                        </div>
+                        <h1 className="text-3xl font-bold mb-6 text-center">Reminders App</h1>
 
-                        <h1 className="text-3xl font-bold mb-6 text-center text-gray-900 dark:text-dark-text">
-                            Reminders App
-                        </h1>
-
-                        {/* Error Message */}
                         {error && (
-                            <div className="bg-red-100 dark:bg-dark-error text-red-700 dark:text-white p-4 rounded mb-6">
-                                {error}
-                            </div>
+                            <div className="bg-dark-error text-white p-4 rounded mb-6">{error}</div>
                         )}
 
-                        {/* Create/Edit Reminder Form */}
-                        <div className="bg-white dark:bg-dark-card p-6 rounded-lg shadow-md mb-6">
-                            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-dark-text">
-                                {editingReminder ? 'Edit Reminder' : 'Create a Reminder'}
-                            </h2>
+                        {/* Reminder Form */}
+                        <div className="bg-dark-card p-6 rounded-lg shadow-md mb-6">
+                            <h2 className="text-xl font-semibold mb-4">{
+                                editingReminder ? 'Edit Reminder' : 'Create a Reminder'
+                            }</h2>
                             <form onSubmit={handleSubmit} className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text">
-                                        User
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={userInput}
-                                        onChange={(e) => setUserInput(e.target.value)}
-                                        className="mt-1 block w-full p-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-dark-text border-gray-300 dark:border-dark-border"
-                                        placeholder="Enter user name"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text">
-                                        Description
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={descriptionInput}
-                                        onChange={(e) => setDescriptionInput(e.target.value)}
-                                        className="mt-1 block w-full p-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-dark-text border-gray-300 dark:border-dark-border"
-                                        placeholder="Enter description"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text">
-                                        Date
-                                    </label>
-                                    <input
-                                        type="datetime-local"
-                                        value={dateInput}
-                                        onChange={(e) => setDateInput(e.target.value)}
-                                        className="mt-1 block w-full p-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-dark-text border-gray-300 dark:border-dark-border"
-                                    />
-                                </div>
-                                <button
-                                    type="submit"
-                                    className="bg-blue-500 dark:bg-blue-700 text-white px-4 py-2 rounded hover:bg-blue-600 dark:hover:bg-blue-800 mr-2"
-                                >
-                                    {editingReminder ? 'Update Reminder' : 'Add Reminder'}
+                                <input type="text" placeholder="User"
+                                    value={userInput}
+                                    onChange={(e) => setUserInput(e.target.value)}
+                                    className="w-full p-2 rounded bg-gray-800 text-dark-text border border-dark-border" />
+                                <input type="text" placeholder="Description"
+                                    value={descriptionInput}
+                                    onChange={(e) => setDescriptionInput(e.target.value)}
+                                    className="w-full p-2 rounded bg-gray-800 text-dark-text border border-dark-border" />
+                                <input type="datetime-local"
+                                    value={dateInput}
+                                    onChange={(e) => setDateInput(e.target.value)}
+                                    className="w-full p-2 rounded bg-gray-800 text-dark-text border border-dark-border" />
+                                <button type="submit"
+                                    className="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded">
+                                    {editingReminder ? 'Update' : 'Add'} Reminder
                                 </button>
                                 {editingReminder && (
-                                    <button
-                                        type="button"
-                                        onClick={() => {
-                                            setEditingReminder(null);
-                                            setUserInput('');
-                                            setDescriptionInput('');
-                                            setDateInput('');
-                                        }}
-                                        className="bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-dark-text px-4 py-2 rounded hover:bg-gray-400 dark:hover:bg-gray-700"
-                                    >
-                                        Cancel
-                                    </button>
+                                    <button type="button" onClick={() => {
+                                        setEditingReminder(null);
+                                        setUserInput('');
+                                        setDescriptionInput('');
+                                        setDateInput('');
+                                    }} className="ml-2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded">Cancel</button>
                                 )}
                             </form>
                         </div>
 
-                        {/* Filter and Sort Section */}
-                        <div className="bg-white dark:bg-dark-card p-6 rounded-lg shadow-md mb-6">
-                            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-dark-text">
-                                Filter & Sort Reminders
-                            </h2>
-                            <div className="space-y-4">
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text">
-                                        Filter by User
-                                    </label>
-                                    <input
-                                        type="text"
-                                        value={filterUser}
-                                        onChange={(e) => setFilterUser(e.target.value)}
-                                        className="mt-1 block w-full p-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-dark-text border-gray-300 dark:border-dark-border"
-                                        placeholder="Enter user name to filter"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text">
-                                        Filter by Date (After)
-                                    </label>
-                                    <input
-                                        type="datetime-local"
-                                        value={filterAfter}
-                                        onChange={(e) => setFilterAfter(e.target.value)}
-                                        className="mt-1 block w-full p-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-dark-text border-gray-300 dark:border-dark-border"
-                                    />
-                                </div>
-                                <div>
-                                    <label className="block text-sm font-medium text-gray-700 dark:text-dark-text">
-                                        Sort By
-                                    </label>
-                                    <select
-                                        value={sortBy}
-                                        onChange={(e) => setSortBy(e.target.value)}
-                                        className="mt-1 block w-full p-2 border rounded-md bg-white dark:bg-gray-800 text-gray-900 dark:text-dark-text border-gray-300 dark:border-dark-border"
-                                    >
-                                        <option value="">None</option>
-                                        <option value="user">User</option>
-                                        <option value="date">Date (Newest First)</option>
-                                    </select>
-                                </div>
-                                <button
-                                    onClick={clearFilters}
-                                    className="bg-gray-300 dark:bg-gray-600 text-gray-800 dark:text-dark-text px-4 py-2 rounded hover:bg-gray-400 dark:hover:bg-gray-700"
-                                >
-                                    Clear Filters
-                                </button>
-                            </div>
+                        {/* Filter & Sort */}
+                        <div className="bg-dark-card p-6 rounded-lg shadow-md mb-6">
+                            <h2 className="text-xl font-semibold mb-4">Filter & Sort</h2>
+                            <input type="text" placeholder="Filter by User"
+                                value={filterUser}
+                                onChange={(e) => setFilterUser(e.target.value)}
+                                className="w-full p-2 rounded bg-gray-800 text-dark-text border border-dark-border mb-2" />
+                            <input type="datetime-local"
+                                value={filterAfter}
+                                onChange={(e) => setFilterAfter(e.target.value)}
+                                className="w-full p-2 rounded bg-gray-800 text-dark-text border border-dark-border mb-2" />
+                            <select value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value)}
+                                className="w-full p-2 rounded bg-gray-800 text-dark-text border border-dark-border mb-2">
+                                <option value="">None</option>
+                                <option value="user">User</option>
+                                <option value="date">Date (Newest First)</option>
+                            </select>
+                            <button onClick={clearFilters}
+                                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded">
+                                Clear Filters
+                            </button>
                         </div>
 
-                        {/* Reminders List */}
-                        <div className="bg-white dark:bg-dark-card p-6 rounded-lg shadow-md">
-                            <h2 className="text-xl font-semibold mb-4 text-gray-900 dark:text-dark-text">
-                                Reminders List
-                            </h2>
+                        {/* Reminder List */}
+                        <div className="bg-dark-card p-6 rounded-lg shadow-md">
+                            <h2 className="text-xl font-semibold mb-4">Reminders List</h2>
                             {reminders.length === 0 ? (
-                                <p className="text-gray-500 dark:text-gray-400">No reminders found.</p>
+                                <p className="text-gray-400">No reminders found.</p>
                             ) : (
-                                <table className="min-w-full bg-white dark:bg-dark-bg border dark:border-dark-border">
+                                <table className="w-full text-left border-collapse">
                                     <thead>
                                         <tr>
-                                            <th className="py-2 px-4 border dark:border-dark-border text-gray-900 dark:text-dark-text">
-                                                User
-                                            </th>
-                                            <th className="py-2 px-4 border dark:border-dark-border text-gray-900 dark:text-dark-text">
-                                                Description
-                                            </th>
-                                            <th className="py-2 px-4 border dark:border-dark-border text-gray-900 dark:text-dark-text">
-                                                Date
-                                            </th>
-                                            <th className="py-2 px-4 border dark:border-dark-border text-gray-900 dark:text-dark-text">
-                                                Actions
-                                            </th>
+                                            <th className="border-b border-dark-border pb-2">User</th>
+                                            <th className="border-b border-dark-border pb-2">Description</th>
+                                            <th className="border-b border-dark-border pb-2">Date</th>
+                                            <th className="border-b border-dark-border pb-2">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {reminders.map((reminder) => (
-                                            <tr key={reminder._id} className="hover:bg-gray-100 dark:hover:bg-gray-800">
-                                                <td className="py-2 px-4 border dark:border-dark-border text-gray-900 dark:text-dark-text">
-                                                    {reminder.user}
-                                                </td>
-                                                <td className="py-2 px-4 border dark:border-dark-border text-gray-900 dark:text-dark-text">
-                                                    {reminder.description}
-                                                </td>
-                                                <td className="py-2 px-4 border dark:border-dark-border text-gray-900 dark:text-dark-text">
-                                                    {new Date(reminder.date).toLocaleString()}
-                                                </td>
-                                                <td className="py-2 px-4 border dark:border-dark-border">
-                                                    <button
-                                                        onClick={() => handleEdit(reminder)}
-                                                        className="bg-yellow-500 text-white px-2 py-1 rounded hover:bg-yellow-600 mr-2"
-                                                    >
+                                        {reminders.map((r) => (
+                                            <tr key={r._id} className="hover:bg-gray-800">
+                                                <td className="py-2">{r.user}</td>
+                                                <td className="py-2">{r.description}</td>
+                                                <td className="py-2">{new Date(r.date).toLocaleString()}</td>
+                                                <td className="py-2">
+                                                    <button onClick={() => handleEdit(r)}
+                                                        className="bg-yellow-600 hover:bg-yellow-700 text-white px-2 py-1 rounded mr-2">
                                                         Edit
                                                     </button>
-                                                    <button
-                                                        onClick={() => handleDelete(reminder._id)}
-                                                        className="bg-red-500 text-white px-2 py-1 rounded hover:bg-red-600"
-                                                    >
+                                                    <button onClick={() => handleDelete(r._id)}
+                                                        className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded">
                                                         Delete
                                                     </button>
                                                 </td>
@@ -368,7 +256,6 @@
             );
         };
 
-        // Render the App
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
