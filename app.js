@@ -1,11 +1,30 @@
-const multiplier = (factor) => {
-    // return number => number * factor
-    return function (number) {
-        return number * factor
+const express = require('express')
+const connectDB = require('./db/connectDB')
+const path = require('path')
+require('dotenv').config()
+const remindersRouter = require('./routes/reminders')
+const homeRouter = require('./routes/index')
+
+const app = express()
+const port = process.env.PORT || 3000
+
+app.use(express.static(path.join(__dirname, 'public')))
+app.use(express.json())
+
+app.use('/', homeRouter)
+app.use('/reminders', remindersRouter)
+
+
+
+const start = async (port) => {
+    try {
+        await connectDB(process.env.MONGO_URI)
+        app.listen(port,
+            console.log(`Server listenning on port ${port}...`)
+        )
+    } catch (error) {
+        console.error(error)
     }
 }
 
-const twice = multiplier(2)
-console.log(twice(5))
-console.log(twice(5))
-console.log(twice(5))
+start(port)
