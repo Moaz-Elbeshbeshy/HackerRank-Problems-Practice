@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reminders App</title>
+
+    <!-- Tailwind CSS CDN with dark mode always enabled via class -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        'dark-bg': '#1a202c',
+                        'dark-card': '#2d3748',
+                        'dark-text': '#e2e8f0',
+                        'dark-border': '#4a5568',
+                        'dark-error': '#f56565',
+                    },
+                },
+            },
+        };
+    </script>
+
+    <!-- Axios CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+
+    <!-- React CDNs -->
+    <script src="https://cdn.jsdelivr.net/npm/react@18/umd/react.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7/babel.min.js"></script>
+</head>
+
+<body class="min-h-screen bg-dark-bg text-dark-text dark" id="body">
+    <div id="root" class="min-h-screen"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, Component } = React;
+
+        class ErrorBoundary extends Component {
+            state = { hasError: false, error: null };
+
+            static getDerivedStateFromError(error) {
+                return { hasError: true, error };
+            }
+
+            render() {
+                if (this.state.hasError) {
+                    return (
+                        <div className="bg-dark-error text-white p-4 rounded mb-6">
+                            <h2 className="text-lg font-semibold">Something went wrong!</h2>
+                            <p>{this.state.error.message}</p>
+                        </div>
+                    );
+                }
+                return this.props.children;
+            }
+        }
+
+        const App = () => {
+            const [reminders, setReminders] = useState([]);
+            const [userInput, setUserInput] = useState('');
+            const [descriptionInput, setDescriptionInput] = useState('');
+            const [dateInput, setDateInput] = useState('');
+            const [filterUser, setFilterUser] = useState('');
+            const [filterAfter, setFilterAfter] = useState('');
+            const [sortBy, setSortBy] = useState('');
+            const [error, setError] = useState(null);
+            const [editingReminder, setEditingReminder] = useState(null);
+
+            const API_BASE = 'https://reminders-api-7lzq.onrender.com';
+
+            const fetchReminders = async () => {
+                try {
+                    let url = `${API_BASE}/reminders`;
+                    const params = new URLSearchParams();
+                    if (filterUser) params.append('user', filterUser);
+                    if (filterAfter) params.append('after', new Date(filterAfter).getTime());
+                    if (sortBy) params.append('sortBy', sortBy);
+                    if (params.toString()) url += `?${params.toString()}`;
+
+                    const response = await axios.get(url);
+                    setReminders(response.data.allReminders || []);
+                    setError(null);
+                } catch (err) {
+                    setError('Failed to fetch reminders: ' + err.message);
+                }
+            };
+
+            useEffect(() => {
+                fetchReminders();
+            }, [filterUser, filterAfter, sortBy]);
+
+            const handleSubmit = async (e) => {
+                e.preventDefault();
+                if (!userInput || !descriptionInput || !dateInput) {
+                    setError('Please fill in all fields');
+                    return;
+                }
+
+                try {
+                    const reminder = {
+                        user: userInput,
+                        description: descriptionInput,
+                        date: new Date(dateInput).toISOString(),
+                    };
+                    if (editingReminder) {
+                        await axios.patch(`${API_BASE}/reminders/${editingReminder._id}`, reminder);
+                        setEditingReminder(null);
+                    } else {
+                        await axios.post(`${API_BASE}/reminders`, reminder);
+                    }
+                    setUserInput('');
+                    setDescriptionInput('');
+                    setDateInput('');
+                    fetchReminders();
+                    setError(null);
+                } catch (err) {
+                    setError('Error: ' + err.message);
+                }
+            };
+
+            const handleEdit = (reminder) => {
+                setEditingReminder(reminder);
+                setUserInput(reminder.user || '');
+                setDescriptionInput(reminder.description || '');
+                setDateInput(new Date(reminder.date).toISOString().slice(0, 16));
+            };
+
+            const handleDelete = async (id) => {
+                if (window.confirm('Are you sure you want to delete this reminder?')) {
+                    try {
+                        await axios.delete(`${API_BASE}/reminders/${id}`);
+                        fetchReminders();
+                        setError(null);
+                    } catch (err) {
+                        setError('Failed to delete reminder: ' + err.message);
+                    }
+                }
+            };
+
+            const clearFilters = () => {
+                setFilterUser('');
+                setFilterAfter('');
+                setSortBy('');
+            };
+
+            return (
+                <ErrorBoundary>
+                    <div className="container mx-auto p-6">
+                        <h1 className="text-3xl font-bold mb-6 text-center">Reminders App</h1>
+
+                        {error && (
+                            <div className="bg-dark-error text-white p-4 rounded mb-6">{error}</div>
+                        )}
+
+                        {/* Reminder Form */}
+                        <div className="bg-dark-card p-6 rounded-lg shadow-md mb-6">
+                            <h2 className="text-xl font-semibold mb-4">{
+                                editingReminder ? 'Edit Reminder' : 'Create a Reminder'
+                            }</h2>
+                            <form onSubmit={handleSubmit} className="space-y-4">
+                                <input type="text" placeholder="User"
+                                    value={userInput}
+                                    onChange={(e) => setUserInput(e.target.value)}
+                                    className="w-full p-2 rounded bg-gray-800 text-dark-text border border-dark-border" />
+                                <input type="text" placeholder="Description"
+                                    value={descriptionInput}
+                                    onChange={(e) => setDescriptionInput(e.target.value)}
+                                    className="w-full p-2 rounded bg-gray-800 text-dark-text border border-dark-border" />
+                                <input type="datetime-local"
+                                    value={dateInput}
+                                    onChange={(e) => setDateInput(e.target.value)}
+                                    className="w-full p-2 rounded bg-gray-800 text-dark-text border border-dark-border" />
+                                <button type="submit"
+                                    className="bg-blue-700 hover:bg-blue-800 text-white px-4 py-2 rounded">
+                                    {editingReminder ? 'Update' : 'Add'} Reminder
+                                </button>
+                                {editingReminder && (
+                                    <button type="button" onClick={() => {
+                                        setEditingReminder(null);
+                                        setUserInput('');
+                                        setDescriptionInput('');
+                                        setDateInput('');
+                                    }} className="ml-2 bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded">Cancel</button>
+                                )}
+                            </form>
+                        </div>
+
+                        {/* Filter & Sort */}
+                        <div className="bg-dark-card p-6 rounded-lg shadow-md mb-6">
+                            <h2 className="text-xl font-semibold mb-4">Filter & Sort</h2>
+                            <input type="text" placeholder="Filter by User"
+                                value={filterUser}
+                                onChange={(e) => setFilterUser(e.target.value)}
+                                className="w-full p-2 rounded bg-gray-800 text-dark-text border border-dark-border mb-2" />
+                            <input type="datetime-local"
+                                value={filterAfter}
+                                onChange={(e) => setFilterAfter(e.target.value)}
+                                className="w-full p-2 rounded bg-gray-800 text-dark-text border border-dark-border mb-2" />
+                            <select value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value)}
+                                className="w-full p-2 rounded bg-gray-800 text-dark-text border border-dark-border mb-2">
+                                <option value="">None</option>
+                                <option value="user">User</option>
+                                <option value="date">Date (Newest First)</option>
+                            </select>
+                            <button onClick={clearFilters}
+                                className="bg-gray-600 hover:bg-gray-700 text-white px-4 py-2 rounded">
+                                Clear Filters
+                            </button>
+                        </div>
+
+                        {/* Reminder List */}
+                        <div className="bg-dark-card p-6 rounded-lg shadow-md">
+                            <h2 className="text-xl font-semibold mb-4">Reminders List</h2>
+                            {reminders.length === 0 ? (
+                                <p className="text-gray-400">No reminders found.</p>
+                            ) : (
+                                <table className="w-full text-left border-collapse">
+                                    <thead>
+                                        <tr>
+                                            <th className="border-b border-dark-border pb-2">User</th>
+                                            <th className="border-b border-dark-border pb-2">Description</th>
+                                            <th className="border-b border-dark-border pb-2">Date</th>
+                                            <th className="border-b border-dark-border pb-2">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {reminders.map((r) => (
+                                            <tr key={r._id} className="hover:bg-gray-800">
+                                                <td className="py-2">{r.user}</td>
+                                                <td className="py-2">{r.description}</td>
+                                                <td className="py-2">{new Date(r.date).toLocaleString()}</td>
+                                                <td className="py-2">
+                                                    <button onClick={() => handleEdit(r)}
+                                                        className="bg-yellow-600 hover:bg-yellow-700 text-white px-2 py-1 rounded mr-2">
+                                                        Edit
+                                                    </button>
+                                                    <button onClick={() => handleDelete(r._id)}
+                                                        className="bg-red-600 hover:bg-red-700 text-white px-2 py-1 rounded">
+                                                        Delete
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            )}
+                        </div>
+                    </div>
+                </ErrorBoundary>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+
+</html>
