@@ -4,10 +4,12 @@ const path = require('path')
 require('dotenv').config()
 const remindersRouter = require('./routes/reminders')
 const homeRouter = require('./routes/index')
+const cors = require('cors')
 
 const app = express()
 const port = process.env.PORT || 3000
 
+app.use(cors())
 app.use(express.static(path.join(__dirname, 'public')))
 app.use(express.json())
 
