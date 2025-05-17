@@ -83,7 +83,7 @@
             // Fetch reminders from backend
             const fetchReminders = async () => {
                 try {
-                    let url = 'http://localhost:3000/reminders';
+                    let url = 'https://reminders-api-7lzq.onrender.com/reminders';
                     const params = new URLSearchParams();
                     if (filterUser) params.append('user', filterUser);
                     if (filterAfter) {
