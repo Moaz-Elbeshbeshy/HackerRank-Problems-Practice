@@ -1,0 +1,212 @@
+[
+    {
+        "name": "Wireless Mouse",
+        "price": 25.99,
+        "mrp": 39.99,
+        "stock": 120,
+        "isPublished": true
+    },
+    {
+        "name": "Bluetooth Headphones",
+        "price": 49.99,
+        "mrp": 79.99,
+        "stock": 80,
+        "isPublished": true
+    },
+    {
+        "name": "USB-C Charger",
+        "price": 18.5,
+        "mrp": 25.0,
+        "stock": 200,
+        "isPublished": true
+    },
+    {
+        "name": "Mechanical Keyboard",
+        "price": 59.99,
+        "mrp": 89.99,
+        "stock": 60,
+        "isPublished": true
+    },
+    {
+        "name": "HDMI Cable",
+        "price": 7.99,
+        "mrp": 14.99,
+        "stock": 300,
+        "isPublished": true
+    },
+    {
+        "name": "Laptop Stand",
+        "price": 29.99,
+        "mrp": 44.99,
+        "stock": 90,
+        "isPublished": true
+    },
+    {
+        "name": "Webcam 1080p",
+        "price": 35.0,
+        "mrp": 49.99,
+        "stock": 70,
+        "isPublished": true
+    },
+    {
+        "name": "Gaming Monitor",
+        "price": 199.99,
+        "mrp": 249.99,
+        "stock": 40,
+        "isPublished": true
+    },
+    {
+        "name": "Smartwatch",
+        "price": 99.0,
+        "mrp": 129.99,
+        "stock": 50,
+        "isPublished": true
+    },
+    {
+        "name": "Portable SSD 1TB",
+        "price": 89.99,
+        "mrp": 119.99,
+        "stock": 35,
+        "isPublished": true
+    },
+    {
+        "name": "Wireless Earbuds",
+        "price": 39.99,
+        "mrp": 59.99,
+        "stock": 150,
+        "isPublished": true
+    },
+    {
+        "name": "Power Bank 10000mAh",
+        "price": 22.5,
+        "mrp": 34.99,
+        "stock": 180,
+        "isPublished": true
+    },
+    {
+        "name": "Smart Speaker",
+        "price": 45.0,
+        "mrp": 69.99,
+        "stock": 65,
+        "isPublished": true
+    },
+    {
+        "name": "LED Desk Lamp",
+        "price": 28.0,
+        "mrp": 39.99,
+        "stock": 100,
+        "isPublished": true
+    },
+    {
+        "name": "Fitness Tracker",
+        "price": 49.5,
+        "mrp": 69.99,
+        "stock": 90,
+        "isPublished": true
+    },
+    {
+        "name": "Bluetooth Speaker",
+        "price": 32.0,
+        "mrp": 49.99,
+        "stock": 110,
+        "isPublished": true
+    },
+    {
+        "name": "Noise Cancelling Headphones",
+        "price": 129.99,
+        "mrp": 179.99,
+        "stock": 45,
+        "isPublished": true
+    },
+    {
+        "name": "Smart LED Strip",
+        "price": 18.0,
+        "mrp": 24.99,
+        "stock": 130,
+        "isPublished": true
+    },
+    {
+        "name": "4K Action Camera",
+        "price": 75.0,
+        "mrp": 99.99,
+        "stock": 55,
+        "isPublished": true
+    },
+    {
+        "name": "Car Phone Mount",
+        "price": 12.99,
+        "mrp": 19.99,
+        "stock": 150,
+        "isPublished": true
+    },
+    {
+        "name": "VR Headset",
+        "price": 149.99,
+        "mrp": 199.99,
+        "stock": 25,
+        "isPublished": true
+    },
+    {
+        "name": "Tripod Stand",
+        "price": 22.0,
+        "mrp": 34.99,
+        "stock": 80,
+        "isPublished": true
+    },
+    {
+        "name": "Graphics Tablet",
+        "price": 59.99,
+        "mrp": 89.99,
+        "stock": 40,
+        "isPublished": true
+    },
+    {
+        "name": "Streaming Microphone",
+        "price": 69.0,
+        "mrp": 99.99,
+        "stock": 60,
+        "isPublished": true
+    },
+    {
+        "name": "Wi-Fi Range Extender",
+        "price": 27.5,
+        "mrp": 39.99,
+        "stock": 100,
+        "isPublished": true
+    },
+    {
+        "name": "Wireless Keyboard",
+        "price": 34.99,
+        "mrp": 49.99,
+        "stock": 70,
+        "isPublished": true
+    },
+    {
+        "name": "Smart Plug",
+        "price": 16.99,
+        "mrp": 24.99,
+        "stock": 120,
+        "isPublished": true
+    },
+    {
+        "name": "Phone Camera Lens Kit",
+        "price": 19.5,
+        "mrp": 29.99,
+        "stock": 85,
+        "isPublished": true
+    },
+    {
+        "name": "Cable Organizer",
+        "price": 9.99,
+        "mrp": 14.99,
+        "stock": 200,
+        "isPublished": true
+    },
+    {
+        "name": "Laptop Backpack",
+        "price": 44.99,
+        "mrp": 69.99,
+        "stock": 65,
+        "isPublished": true
+    }
+]
